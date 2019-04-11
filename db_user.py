@@ -6,7 +6,7 @@ import traceback
 import pymysql
 
 def get_poem(image):
-    db = pymysql.connect("119.29.173.14", "root", "756896214", "xunshi")
+    db = pymysql.connect("119.29.173.**", "root", "756896214", "xunshi")
     cursor = db.cursor()
     sql='SELECT * FROM Image WHERE image="{}"'.format(image)
     try:

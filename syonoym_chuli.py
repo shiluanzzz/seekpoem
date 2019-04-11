@@ -9,7 +9,7 @@ import time
 
 
 def find_jinyici(word):
-    with open('image2.json', 'r')as f:
+    with open('image.json', 'r')as f:
         data = json.load(f)
     time1=time.time()
     count=0
@@ -27,7 +27,7 @@ def find_jinyici(word):
     file2.close()
 
 def find_jyc(word,num):
-    with open('image2.json', 'r')as f:
+    with open('image.json', 'r')as f:
         data = json.load(f)
     num=float(num)# 相似度值
     copy=list(data)

@@ -30,15 +30,30 @@ def find_jyc(word,num):
     with open('image.json', 'r')as f:
         data = json.load(f)
     num=float(num)# 相似度值
-    copy=list(data)
-    while len(copy):
-        data_word=copy[random.randint(0,len(copy)-1)]
-        copy.remove(data_word)
-        r=synonyms.compare(word,data_word,seg=False)
+
+    if num<0.4:
+        return {'poem_image':'花','num':'0.001'}
+    else:
+        copy=list(data)
+        while len(copy):
+            data_word=copy[random.randint(0,len(copy)-1)]
+            copy.remove(data_word)
+            r=synonyms.compare(word,data_word,seg=False)
+            if r>num:
+                return {'poem_image':data_word,'num':r}
+        return find_jyc(word,num=num-0.1)
+
+def find_it(word,num):
+    num=float(num)
+    with open('image.json', 'r')as f:
+        data = json.load(f)
+    for data_word in data:
+        r = synonyms.compare(word, data_word, seg=False)
         if r>num:
             return {'poem_image':data_word,'num':r}
-    return find_jyc(word,num=num-0.1)
-
+        else:
+            pass
+    return {'poem_image':'花','num':0.0001}
 if __name__ == '__main__':
 
     a=find_jyc('石头',0.9)['num']

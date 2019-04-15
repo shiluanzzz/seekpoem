@@ -2,59 +2,64 @@
 # __author__ = "shitou6"
 import json
 import random
-
+import traceback
+import db_connect
 import synonyms
 import time
 
+import logging
+logger=logging.getLogger(__name__) # 设置日志名称
+logger.setLevel(logging.INFO) #设置日志打印等级
+handler=logging.FileHandler("syonoym.log") # 创建日志文件
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')# 设置日志的打印格式
+handler.setFormatter(formatter) #
+logger.addHandler(handler)
 
 
-def find_jinyici(word):
-    with open('image.json', 'r')as f:
-        data = json.load(f)
-    time1=time.time()
-    count=0
-    file1=open('temp.txt','w')
-    file2=open('xiangsi.txt','w+')
-    for each in data:
-        r=synonyms.compare(word,each,seg=False)
-        if r>0.8:
-            str1=str("{} , {} 相似度：{}".format(word,each,str(r)))
-            file2.write(str1+'\n')
-        sst=str(str(count)+"time: {}".format(str(time.time()-time1)))
-        file1.write(sst+'\n')
-        count+=1
-    file1.close()
-    file2.close()
+def find_jyc(word,num=0.9):
 
-def find_jyc(word,num):
-    with open('image.json', 'r')as f:
-        data = json.load(f)
-    num=float(num)# 相似度值
-
-    if num<0.4:
-        return {'poem_image':'花','num':'0.001'}
-    else:
-        copy=list(data)
-        while len(copy):
-            data_word=copy[random.randint(0,len(copy)-1)]
-            copy.remove(data_word)
-            r=synonyms.compare(word,data_word,seg=False)
-            if r>num:
-                return {'poem_image':data_word,'num':r}
-        return find_jyc(word,num=num-0.1)
-
-def find_it(word,num):
-    num=float(num)
-    with open('image.json', 'r')as f:
-        data = json.load(f)
-    for data_word in data:
-        r = synonyms.compare(word, data_word, seg=False)
-        if r>num:
-            return {'poem_image':data_word,'num':r}
+    try:
+        try:
+            with open('image.json', 'r')as f:
+                data = json.load(f)
+            num=float(num)# 相似度值
+        except:
+            print("image.json 文件不存在 正在重新下载")
+            db_connect.get_image_json()
+            return find_jyc(word,num)
+        if num<0.4:
+            return {'poem_image':'花','num':'0.001'}
         else:
-            pass
-    return {'poem_image':'花','num':0.0001}
-if __name__ == '__main__':
+            copy=list(data)
+            while len(copy):
+                data_word=copy[random.randint(0,len(copy)-1)]
+                copy.remove(data_word)
+                r=synonyms.compare(word,data_word,seg=False)
+                if r>num:
+                    return {'poem_image':data_word,'num':r}
+            return find_jyc(word,num=num-0.1)
+    except:
+        pass
 
-    a=find_jyc('石头',0.9)['num']
+#
+# def find_it(word,num):
+#
+#     try:
+#         num=float(num)
+#         with open('image.json', 'r')as f:
+#             data = json.load(f)
+#         for data_word in data:
+#             r = synonyms.compare(word, data_word, seg=False)
+#             if r>num:
+#                 return {'poem_image':data_word,'num':r}
+#             else:
+#                 pass
+#         return {'poem_image':'花','num':0.0001}
+#     except:
+#         logger.error(traceback.format_exc())
+#         return {'poem_image':'花','num':0.0001}
+
+
+if __name__ == '__main__':
+    a=find_jyc("枫树",0.9)
     print(a)

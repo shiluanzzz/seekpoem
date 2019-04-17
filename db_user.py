@@ -136,6 +136,24 @@ def FindPoemByKey(key):
         "title_list":title_list
     },ensure_ascii=False)
 
+def get_poet_info(word):
+    db = pymysql.connect("119.29.173.14", "root", "756896214", "xunshi")
+    cursor = db.cursor()
+    sql = "SELECT * FROM Poet WHERE author = '{}';".format(word)
+    try:
+        cursor.execute(sql)
+        results = cursor.fetchone()
+        if len(results) == 0:
+            print('no results')
+            results = None
+        # print(len(results))
+    except:
+        logger.error(traceback.format_exc())
+        db.close()
+        return None
+    db.close()
+    return results
 if __name__ == '__main__':
-    a=get_poems("樱桃")
+    a=get_poet_info("shit")
     print(a)
+

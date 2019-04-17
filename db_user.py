@@ -3,8 +3,16 @@
 import json
 import random
 import traceback
-
 import pymysql,logging
+from configparser import ConfigParser
+conf=ConfigParser()
+conf.read('db.cfg')
+section = conf.sections()[0]
+host=conf.get(section,'host')
+db_name=conf.get(section,'db')
+user=conf.get(section,'user')
+passwd=conf.get(section,'passwd')
+
 logger = logging.getLogger(__name__)  # 设置日志名称
 logger.setLevel(logging.INFO)  # 设置日志打印等级
 handler = logging.FileHandler("db_user.log")  # 创建日志文件
@@ -18,8 +26,8 @@ def get_poems(image):
     :param image: 意向
     :return: 所有诗 如果这个意向在数据库不存在 则返回空。
     """
-    print(image)
-    db = pymysql.connect("119.29.173.14", "root", "756896214", "xunshi")
+    # print(image)
+    db = pymysql.connect(host=host, user=user, passwd=passwd,db=db_name)
     cursor = db.cursor()
     sql = 'SELECT * FROM Image WHERE image="{}"'.format(image)
     try:
@@ -38,8 +46,7 @@ def get_poems(image):
     return results
 
 def get_poem(image):
-
-    db = pymysql.connect("119.29.173.14", "root", "756896214", "xunshi")
+    db = pymysql.connect(host=host, user=user, passwd=passwd,db=db_name)
     cursor = db.cursor()
     sql='SELECT * FROM Image WHERE image="{}"'.format(image)
     try:
@@ -54,7 +61,7 @@ def get_poem(image):
     return result
 
 def GetPoems_Random():
-    db = pymysql.connect("119.29.173.14", "root", "756896214", "xunshi")
+    db = pymysql.connect(host=host, user=user, passwd=passwd,db=db_name)
     cursor = db.cursor()
     sql = "SELECT * FROM Image WHERE id mod {}=0".format(random.randint(50,60))
     try:
@@ -77,7 +84,7 @@ def FindPoemByKey(key):
     :param key:
     :return:
     """
-    db = pymysql.connect("119.29.173.14", "root", "756896214", "xunshi")
+    db = pymysql.connect(host=host, user=user, passwd=passwd,db=db_name)
     cursor = db.cursor()
     sql1 = 'SELECT * FROM Image WHERE author ="{}"'.format(key)
     sql2 = 'SELECT * FROM Image WHERE title like "%{}%"'.format(key)
@@ -137,7 +144,7 @@ def FindPoemByKey(key):
     },ensure_ascii=False)
 
 def get_poet_info(word):
-    db = pymysql.connect("119.29.173.14", "root", "756896214", "xunshi")
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
     sql = "SELECT * FROM Poet WHERE author = '{}';".format(word)
     try:
@@ -154,6 +161,5 @@ def get_poet_info(word):
     db.close()
     return results
 if __name__ == '__main__':
-    a=get_poet_info("shit")
-    print(a)
-
+    print(get_poems("山"))
+    # print(get_poet_info("李白"))

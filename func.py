@@ -108,7 +108,6 @@ def GetPoems():
     查询所有诗
     :return:
     """
-
     try:
         db_results = db_user.GetPoems_Random()
         if db_results:

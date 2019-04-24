@@ -88,11 +88,14 @@ def FindPoemByKey(key):
     cursor = db.cursor()
     sql1 = 'SELECT * FROM Image WHERE author ="{}"'.format(key)
     sql2 = 'SELECT * FROM Image WHERE title like "%{}%"'.format(key)
+    sql3 = 'SELECT * FROM Image WHERE content like "%{}%"'.format(key)
     try:
         cursor.execute(sql1)
         results1 = cursor.fetchall()
         cursor.execute(sql2)
         results2 = cursor.fetchall()
+        cursor.execute(sql3)
+        results3=cursor.fetchall()
         try:
             if len(results1[0]) == 0:
                 results1 = None
@@ -103,6 +106,11 @@ def FindPoemByKey(key):
                 results2 = None
         except:
             results2=None
+        try:
+            if len(results3[0]) == 0:
+                results3 = None
+        except:
+            results3=None
     except:
         logger.error(traceback.format_exc())
         db.close()
@@ -110,6 +118,7 @@ def FindPoemByKey(key):
     db.close()
     author_list=[]
     title_list=[]
+    content_list=[]
     if results1:
         for db_result in results1:
             data = {'db_id': db_result[0],
@@ -136,11 +145,26 @@ def FindPoemByKey(key):
             title_list.append(data)
     else:
         pass
+    if results3:
+        for db_result in results3:
+            data = {'db_id': db_result[0],
+                    'title': db_result[1],
+                    'author': db_result[2],
+                    'dynasty': db_result[3],
+                    'content': db_result[4],
+                    'poem_image': db_result[5],
+                    'typeid': db_result[6]
+                    }
+            content_list.append(data)
+    else:
+        pass
     return json.dumps({
         "author_num":len(author_list),
         "title_num":len(title_list),
+        "content_num":len(content_list),
         "author_list":author_list,
-        "title_list":title_list
+        "title_list":title_list,
+        "content_list":content_list
     },ensure_ascii=False)
 
 def get_poet_info(word):
@@ -161,5 +185,6 @@ def get_poet_info(word):
     db.close()
     return results
 if __name__ == '__main__':
-    print(get_poems("山"))
+    # print(get_poem(""))
     # print(get_poet_info("李白"))
+    print(FindPoemByKey(""))

@@ -4,6 +4,8 @@ import json
 import logging
 import traceback
 from flask import Flask, request
+
+import db_user
 import func
 from db_user import FindPoemByKey
 
@@ -53,6 +55,12 @@ def FindPoem():
 def GetPoetInfo():
     word = request.args.get('name')
     return func.GetPoetInfo(word)
+
+@app.route("/GetPoemByPosition",methods=['GET'])
+def GetPoemByPosition():
+    w=request.args.get('w')
+    j=request.args.get('j')
+    return db_user.get_poem_by_position(j=j,w=w)
 
 if __name__ == '__main__':
 

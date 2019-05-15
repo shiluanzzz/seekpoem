@@ -3,15 +3,16 @@
 import json
 import random
 import traceback
-import pymysql,logging
+import pymysql, logging
 from configparser import ConfigParser
-conf=ConfigParser()
+
+conf = ConfigParser()
 conf.read('db.cfg')
 section = conf.sections()[0]
-host=conf.get(section,'host')
-db_name=conf.get(section,'db')
-user=conf.get(section,'user')
-passwd=conf.get(section,'passwd')
+host = conf.get(section, 'host')
+db_name = conf.get(section, 'db')
+user = conf.get(section, 'user')
+passwd = conf.get(section, 'passwd')
 
 logger = logging.getLogger(__name__)  # 设置日志名称
 logger.setLevel(logging.INFO)  # 设置日志打印等级
@@ -20,6 +21,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)  #
 logger.addHandler(handler)
 
+
 def get_poems(image):
     """
     根据意向获取匹配的所有诗
@@ -27,15 +29,15 @@ def get_poems(image):
     :return: 所有诗 如果这个意向在数据库不存在 则返回空。
     """
     # print(image)
-    db = pymysql.connect(host=host, user=user, passwd=passwd,db=db_name)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
     sql = 'SELECT * FROM Image WHERE image="{}"'.format(image)
     try:
         cursor.execute(sql)
         results = cursor.fetchall()
-        if len(results[0])==0:
+        if len(results[0]) == 0:
             print('no results')
-            results=None
+            results = None
         else:
             pass
     except:
@@ -45,14 +47,15 @@ def get_poems(image):
     db.close()
     return results
 
+
 def get_poem(image):
-    db = pymysql.connect(host=host, user=user, passwd=passwd,db=db_name)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
-    sql='SELECT * FROM Image WHERE image="{}"'.format(image)
+    sql = 'SELECT * FROM Image WHERE image="{}"'.format(image)
     try:
         cursor.execute(sql)
         results = cursor.fetchall()
-        result=results[random.randint(0,len(results)-1)]
+        result = results[random.randint(0, len(results) - 1)]
     except:
         logger.error(traceback.format_exc())
         db.close()
@@ -60,10 +63,11 @@ def get_poem(image):
     db.close()
     return result
 
+
 def GetPoems_Random():
-    db = pymysql.connect(host=host, user=user, passwd=passwd,db=db_name)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
-    sql = "SELECT * FROM Image WHERE id mod {}=0".format(random.randint(50,60))
+    sql = "SELECT * FROM Image WHERE id mod {}=0".format(random.randint(50, 60))
     try:
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -78,13 +82,14 @@ def GetPoems_Random():
     db.close()
     return results
 
+
 def FindPoemByKey(key):
     """
     根据关键词查找
     :param key:
     :return:
     """
-    db = pymysql.connect(host=host, user=user, passwd=passwd,db=db_name)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
     sql1 = 'SELECT * FROM Image WHERE author ="{}"'.format(key)
     sql2 = 'SELECT * FROM Image WHERE title like "%{}%"'.format(key)
@@ -95,30 +100,30 @@ def FindPoemByKey(key):
         cursor.execute(sql2)
         results2 = cursor.fetchall()
         cursor.execute(sql3)
-        results3=cursor.fetchall()
+        results3 = cursor.fetchall()
         try:
             if len(results1[0]) == 0:
                 results1 = None
         except:
-            results1=None
+            results1 = None
         try:
             if len(results2[0]) == 0:
                 results2 = None
         except:
-            results2=None
+            results2 = None
         try:
             if len(results3[0]) == 0:
                 results3 = None
         except:
-            results3=None
+            results3 = None
     except:
         logger.error(traceback.format_exc())
         db.close()
         return None
     db.close()
-    author_list=[]
-    title_list=[]
-    content_list=[]
+    author_list = []
+    title_list = []
+    content_list = []
     if results1:
         for db_result in results1:
             data = {'db_id': db_result[0],
@@ -159,13 +164,14 @@ def FindPoemByKey(key):
     else:
         pass
     return json.dumps({
-        "author_num":len(author_list),
-        "title_num":len(title_list),
-        "content_num":len(content_list),
-        "author_list":author_list,
-        "title_list":title_list,
-        "content_list":content_list
-    },ensure_ascii=False)
+        "author_num": len(author_list),
+        "title_num": len(title_list),
+        "content_num": len(content_list),
+        "author_list": author_list,
+        "title_list": title_list,
+        "content_list": content_list
+    }, ensure_ascii=False)
+
 
 def get_poet_info(word):
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
@@ -184,6 +190,48 @@ def get_poet_info(word):
         return None
     db.close()
     return results
+
+def jisuan(w, j):
+    '''
+    从数据库中查找最近的位置
+    :param w: 维度
+    :param j: 经度
+    :return:返回area_code
+    '''
+    sql2 = '''
+
+SELECT area_code,city,j,w,ROUND(6378.138*2*ASIN(SQRT(POW(SIN(({}*PI()/180-w*PI()/180)/2),2)+COS({}*PI()/180)*COS(w*PI()/180)*POW(SIN(({}*PI()/180-j*PI()/180)/2),2)))*1000) AS distant
+FROM Map
+ORDER BY distant
+'''.format(w, w, j)
+    # 经纬度转化
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+    cursor = db.cursor()
+    cursor.execute(sql2)
+    result = cursor.fetchone()
+    db.close()
+    return result
+
+def get_poem_by_position(j,w):
+    jisuan_result=jisuan(w,j)
+    area_code=jisuan_result[0]
+    sql="SELECT * FROM Poem where area_code='{}' ;".format(area_code)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+    cursor = db.cursor()
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    data_list=[]
+    for each in result:
+        dd={
+            'title':each[0],
+            'author':each[1],
+            'dynasty':each[2],
+            'content':each[3],
+            'area_code':each[4],
+            'city':jisuan_result[1]
+        }
+        data_list.append(dd)
+    return json.dumps(data_list,ensure_ascii=False)
 if __name__ == '__main__':
     # print(get_poem(""))
     # print(get_poet_info("李白"))

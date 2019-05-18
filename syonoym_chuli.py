@@ -41,25 +41,6 @@ def find_jyc(word,num=0.9):
     except:
         pass
 
-#
-# def find_it(word,num):
-#
-#     try:
-#         num=float(num)
-#         with open('image.json', 'r')as f:
-#             data = json.load(f)
-#         for data_word in data:
-#             r = synonyms.compare(word, data_word, seg=False)
-#             if r>num:
-#                 return {'poem_image':data_word,'num':r}
-#             else:
-#                 pass
-#         return {'poem_image':'花','num':0.0001}
-#     except:
-#         logger.error(traceback.format_exc())
-#         return {'poem_image':'花','num':0.0001}
-
-
 if __name__ == '__main__':
     a=find_jyc("枫树",0.9)
     print(a)

@@ -3,8 +3,9 @@
 import json
 import random
 import traceback
-import pymysql, logging
 from configparser import ConfigParser
+import logging
+import pymysql,time
 
 conf = ConfigParser()
 conf.read('db.cfg')
@@ -191,6 +192,7 @@ def get_poet_info(word):
     db.close()
     return results
 
+
 def jisuan(w, j):
     '''
     从数据库中查找最近的位置
@@ -199,11 +201,11 @@ def jisuan(w, j):
     :return:返回area_code
     '''
     sql2 = '''
-
-SELECT area_code,city,j,w,ROUND(6378.138*2*ASIN(SQRT(POW(SIN(({}*PI()/180-w*PI()/180)/2),2)+COS({}*PI()/180)*COS(w*PI()/180)*POW(SIN(({}*PI()/180-j*PI()/180)/2),2)))*1000) AS distant
-FROM Map
-ORDER BY distant
-'''.format(w, w, j)
+    
+    SELECT area_code,city,j,w,ROUND(6378.138*2*ASIN(SQRT(POW(SIN(({}*PI()/180-w*PI()/180)/2),2)+COS({}*PI()/180)*COS(w*PI()/180)*POW(SIN(({}*PI()/180-j*PI()/180)/2),2)))*1000) AS distant
+    FROM Map
+    ORDER BY distant
+    '''.format(w, w, j)
     # 经纬度转化
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
@@ -211,28 +213,48 @@ ORDER BY distant
     result = cursor.fetchone()
     db.close()
     return result
+    #<class 'tuple'>: ('CN6529', '阿克苏地区', 80.2606, 41.1688, 5272281.0)
 
-def get_poem_by_position(j,w):
-    jisuan_result=jisuan(w,j)
-    area_code=jisuan_result[0]
-    sql="SELECT * FROM Poem where area_code='{}' ;".format(area_code)
+def get_poem_by_position(j, w):
+    jisuan_result = jisuan(w, j)
+    area_code = jisuan_result[0]
+    sql = "SELECT * FROM Poem where area_code='{}' ;".format(area_code)
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
     cursor.execute(sql)
     result = cursor.fetchall()
-    data_list=[]
+    data_list = []
     for each in result:
-        dd={
-            'title':each[0],
-            'author':each[1],
-            'dynasty':each[2],
-            'content':each[3],
-            'area_code':each[4],
-            'city':jisuan_result[1]
+        dd = {
+            'title': each[0],
+            'author': each[1],
+            'dynasty': each[2],
+            'content': each[3],
+            'area_code': each[4],
+            'city': jisuan_result[1]
         }
         data_list.append(dd)
-    return json.dumps(data_list,ensure_ascii=False)
+    return json.dumps(data_list, ensure_ascii=False)
+
+
+def SaveHeadingImg(url,nickname,openid):
+    try:
+        now_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        sql='INSERT into Homepage_img (url,like_num,creat_time,nickname,openid) value ("{}","{}","{}","{}","{}")'.format(url,'0',now_time,nickname,openid)
+        db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+        cursor = db.cursor()
+        cursor.execute(sql)
+        db.commit()
+        db.close()
+        return True
+    except:
+        traceback.print_exc()
+        print(sql)
+        logger.error(traceback.format_exc())
+        return False
 if __name__ == '__main__':
     # print(get_poem(""))
     # print(get_poet_info("李白"))
-    print(FindPoemByKey(""))
+    # print(FindPoemByKey(""))
+    # SaveHeadingImg('http://www.baidu.com','shitou','123')
+    jisuan('20','30')

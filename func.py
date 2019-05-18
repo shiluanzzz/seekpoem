@@ -6,7 +6,7 @@ import traceback
 
 import db_user
 from syonoym_chuli import find_jyc
-from image_handle import image_test
+
 logger = logging.getLogger(__name__)  # 设置日志名称
 logger.setLevel(logging.INFO)  # 设置日志打印等级
 handler = logging.FileHandler("func.log")  # 创建日志文件
@@ -125,7 +125,15 @@ def GetPoems():
         logger.error(traceback.format_exc())
 
 
+def FindPoemByImageAndPosition(image,j,w):
+    position=db_user.jisuan(j=j,w=w)
+    image_data=get_poems_by_image(image)
+    position_date=db_user.get_poem_by_position(j=j,w=w)
+    for each in image_data,position_date:
+        pass
 
 
 if __name__ == '__main__':
-    draw()
+    # draw()
+    pass
+

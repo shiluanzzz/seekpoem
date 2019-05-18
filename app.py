@@ -62,6 +62,13 @@ def GetPoemByPosition():
     j=request.args.get('j')
     return db_user.get_poem_by_position(j=j,w=w)
 
+
+@app.route("/FindPoemByImageAndPosition",methods=['GET'])
+def FindPoemByImageAndPosition():
+    image=request.args.get('i')
+    j=request.args.get('j')
+    w=request.args.get('w')
+    return func.FindPoemByImageAndPosition(image=image,j=j,w=w)
 if __name__ == '__main__':
 
-    app.run(host="0.0.0.0",port="8000",debug=False)
+    app.run(host="0.0.0.0",port="8000",debug=True)

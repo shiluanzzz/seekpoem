@@ -62,6 +62,22 @@ def GetPoemByPosition():
     j=request.args.get('j')
     return db_user.get_poem_by_position(j=j,w=w)
 
+@app.route('/GetHeadImg',methods=['GET'])
+def GetHeadImg():
+    return db_user.GetHeadImg()
+
+@app.route('/favor',methods=['GET'])
+def favor():
+    id=request.args.get('id')
+    return db_user.favor_img(id)
+
+@app.route('/SaveHeadingImg',methods=['GET'])
+def SaveHeadingImg():
+    url=request.args.get('url')
+    nickname=request.args.get('nickname')
+    openid=request.args.get('openid')
+    poem_title=request.args.get('poem_title')
+    return db_user.SaveHeadingImg(url=url,nickname=nickname,openid=openid,poem_title=poem_title)
 
 @app.route("/FindPoemByImageAndPosition",methods=['GET'])
 def FindPoemByImageAndPosition():
@@ -69,6 +85,11 @@ def FindPoemByImageAndPosition():
     j=request.args.get('j')
     w=request.args.get('w')
     return func.FindPoemByImageAndPosition(image=image,j=j,w=w)
+
+@app.route("/FindMyPoem",methods=['GET'])
+def FindMyPoem():
+    id=request.args.get('id')
+    return db_user.GetImgByOpenId(id)
 if __name__ == '__main__':
 
     app.run(host="0.0.0.0",port="8000",debug=True)

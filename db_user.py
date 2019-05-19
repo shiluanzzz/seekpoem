@@ -5,7 +5,7 @@ import random
 import traceback
 from configparser import ConfigParser
 import logging
-import pymysql,time
+import pymysql, time
 
 conf = ConfigParser()
 conf.read('db.cfg')
@@ -213,7 +213,8 @@ def jisuan(w, j):
     result = cursor.fetchone()
     db.close()
     return result
-    #<class 'tuple'>: ('CN6529', '阿克苏地区', 80.2606, 41.1688, 5272281.0)
+    # <class 'tuple'>: ('CN6529', '阿克苏地区', 80.2606, 41.1688, 5272281.0)
+
 
 def get_poem_by_position(j, w):
     jisuan_result = jisuan(w, j)
@@ -237,24 +238,116 @@ def get_poem_by_position(j, w):
     return json.dumps(data_list, ensure_ascii=False)
 
 
-def SaveHeadingImg(url,nickname,openid):
+def SaveHeadingImg(url, nickname, openid,poem_title):
     try:
-        now_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        sql='INSERT into Homepage_img (url,like_num,creat_time,nickname,openid) value ("{}","{}","{}","{}","{}")'.format(url,'0',now_time,nickname,openid)
+        now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        sql = 'INSERT into Homepage_img (url,like_num,creat_time,nickname,openid,poem_title) value ("{}","{}","{}","{}","{}","{}")'.format(url, '0', now_time, nickname, openid,poem_title)
         db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
         cursor = db.cursor()
         cursor.execute(sql)
         db.commit()
         db.close()
-        return True
+        return 'success'
     except:
         traceback.print_exc()
         print(sql)
         logger.error(traceback.format_exc())
-        return False
+        return 'error'
+
+# 点赞
+def favor_img(id):
+    sql = "SELECT like_num FROM Homepage_img where id={}".format(id)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+    cursor = db.cursor()
+    cursor.execute(sql)
+    try:
+        like_num = cursor.fetchall()[0][0]
+        like_num += 1
+        sql2 = 'UPDATE Homepage_img set like_num={} where id ={}'.format(like_num, id)
+        cursor.execute(sql2)
+        db.commit()
+        return 'success'
+    except:
+        return 'error'
+
+
+# 获取首页图片
+def GetHeadImg():
+    sql = "SELECT * FROM Homepage_img"
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+    cursor = db.cursor()
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    data = []
+    for each in result:
+        dd = {'url': each[0],
+              'like_num': each[1],
+              'creat_time': str(each[2]),
+              'id': each[3],
+              'nikename': each[4],
+              'openid': each[5],
+              'poem_title': each[6]}
+        data.append(dd)
+    return json.dumps(data, ensure_ascii=False)
+
+
+def GetImgByOpenId(openid):
+    """
+    用户查询自己的诗迹
+    :param openid: 用户id
+    :return:
+    """
+    openid = str(openid)
+    sql = "SELECT * FROM Homepage_img where openid='{}'".format(openid)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+    cursor = db.cursor()
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    data = []
+    for each in result:
+        dd = {'url': each[0],
+              'like_num': each[1],
+              'creat_time': str(each[2]),
+              'id': each[3],
+              'nikename': each[4],
+              'openid': each[5],
+              'poem_title': each[6]}
+        data.append(dd)
+    return json.dumps(data, ensure_ascii=False)
+
+def FindPoemByIdAndAreaCode(position, image_id_list):
+    image_id_list=list(image_id_list)
+    position=position
+    image_in=""
+    for each in image_id_list:
+        image_in+="({}),".format(each)
+    image_in=image_in[:len(image_in)-1]
+    print(image_id_list,type(image_id_list))
+    sql='select * from Image_Poem where ip_areacode="{}" and image_id in ({})'.format(position,image_in)
+    print(sql)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+    cursor = db.cursor()
+    cursor.execute(sql)
+    result=cursor.fetchall()
+    data=[]
+    for each in result:
+        dd={'title':each[0],
+            'author':each[1],
+            'dynasty':each[2],
+            'content':each[3],
+            'image':each[4],
+            'areacode':each[5],
+            'typeid':each[6],
+            'image_id':each[7]}
+        data.append(dd)
+    return json.dumps(data,ensure_ascii=False)
+
+
 if __name__ == '__main__':
     # print(get_poem(""))
     # print(get_poet_info("李白"))
     # print(FindPoemByKey(""))
     # SaveHeadingImg('http://www.baidu.com','shitou','123')
     jisuan('20','30')
+
+

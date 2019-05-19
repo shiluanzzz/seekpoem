@@ -126,14 +126,14 @@ def GetPoems():
 
 
 def FindPoemByImageAndPosition(image,j,w):
-    position=db_user.jisuan(j=j,w=w)
-    image_data=get_poems_by_image(image)
-    position_date=db_user.get_poem_by_position(j=j,w=w)
-    for each in image_data,position_date:
-        pass
+    position=db_user.jisuan(j=j,w=w)[0] #ip_areacode
+    print(position)
+    image_data=json.loads(get_poems_by_image(image))
+    image_id_list=[each['db_id'] for each in image_data]
+    return db_user.FindPoemByIdAndAreaCode(position,image_id_list)
 
 
 if __name__ == '__main__':
-    # draw()
-    pass
+    a=FindPoemByImageAndPosition('花',114.308,34.7972)
+    print(a)
 

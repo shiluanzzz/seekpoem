@@ -71,7 +71,7 @@ def GetHeadImg():
 def favor():
     id=request.args.get('id')
     openid=request.args.get('openid')
-    return db_user.favor_img(id)
+    return db_user.favor_img(id,openid)
 
 @app.route('/SaveHeadingImg',methods=['GET'])
 def SaveHeadingImg():
@@ -99,7 +99,7 @@ def GetHotPoet():
     return db_user.GetHotPoet()
 
 #保持用户地理位置
-@app.route('/SaveUserSites',method=['GET'])
+@app.route('/SaveUserSites',methods=['GET'])
 def SaveUserSites():
     j=request.args.get('j')
     w=request.args.get('w')

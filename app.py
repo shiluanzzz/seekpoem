@@ -104,7 +104,7 @@ def SaveUserSites():
     j=request.args.get('j')
     w=request.args.get('w')
     openid=request.args.get('openid')
-    db_user.SaveUserSites(j,w,openid)
+    return db_user.SaveUserSites(j,w,openid)
 
 #获取拥护去过的地方
 @app.route('/GetUserSites',methods=['GET'])

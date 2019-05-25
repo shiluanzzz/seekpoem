@@ -450,7 +450,7 @@ def SaveUserSites(j, w, openid):
             sql="INSERT INTO user_site (open_id,site,time) VALUES ('{}','{}','{}')".format(openid,site,time)
         cursor.execute(sql)
         db.commit()
-        return 'success'
+        return 'success site:{}'.format(site)
     except:
         traceback.print_exc()
         return 'error'

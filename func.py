@@ -4,8 +4,10 @@ import json
 import logging
 import traceback
 
+import requests
+
 import db_user
-from syonoym_chuli import find_jyc
+# from syonoym_chuli import find_jyc
 
 logger = logging.getLogger(__name__)  # 设置日志名称
 logger.setLevel(logging.INFO)  # 设置日志打印等级
@@ -132,8 +134,28 @@ def FindPoemByImageAndPosition(image,j,w):
     image_id_list=[each['db_id'] for each in image_data]
     return db_user.FindPoemByIdAndAreaCode(position,image_id_list)
 
+def jwd_to_site(j,w):
+    """
+    经纬度转地名
+    :param j:  经度
+    :param w: 纬度
+    :return:  返回地名
+    """
+    parameters = {'location': "{},{}".format(str(j),str(w)), 'key': 'cfedb9207134ba8128b62a0c171c3de2'}
+    base = 'https://restapi.amap.com/v3/geocode/regeo?'
+    response = requests.get(base, parameters)
+    print(response.url)
+    answer = response.json()
+    try:
+        city=answer['regeocode']['addressComponent']['city']
+        return str(city).strip('市')
+    except:
+        province=answer['regeocode']['addressComponent']['province']
+        return str(province).strip('省')
+
 
 if __name__ == '__main__':
-    a=FindPoemByImageAndPosition('花',114.308,34.7972)
+    # a=FindPoemByImageAndPosition('花',114.308,34.7972)
+    # print(a)
+    a=jwd_to_site(114.308,34.7972)
     print(a)
-

@@ -64,7 +64,8 @@ def GetPoemByPosition():
 
 @app.route('/GetHeadImg',methods=['GET'])
 def GetHeadImg():
-    return db_user.GetHeadImg()
+    flag=request.args.get('flag')
+    return db_user.GetHeadImg(int(flag))
 
 @app.route('/favor',methods=['GET'])
 def favor():
@@ -90,6 +91,27 @@ def FindPoemByImageAndPosition():
 def FindMyPoem():
     id=request.args.get('id')
     return db_user.GetImgByOpenId(id)
+
+#获取热门关键词
+@app.route("/GetHotPoet",methods=['GET'])
+def GetHotPoet():
+    return db_user.GetHotPoet()
+
+#保持用户地理位置
+@app.route('/SaveUserSites',method=['GET'])
+def SaveUserSites():
+    j=request.args.get('j')
+    w=request.args.get('w')
+    openid=request.args.get('openid')
+    db_user.SaveUserSites(j,w,openid)
+
+#获取拥护去过的地方
+@app.route('/GetUserSites',methods=['GET'])
+def GetUserSites():
+    openid=request.args.get('openid')
+    return db_user.GetHotUserSite(openid)
+
+
 if __name__ == '__main__':
 
     app.run(host="0.0.0.0",port="8000",debug=True)

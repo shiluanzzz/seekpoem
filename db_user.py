@@ -1,11 +1,13 @@
 # -*- coding:utf-8 -*-
 # __author__ = "shitou6"
 import json
+import operator
 import random
 import traceback
 from configparser import ConfigParser
 import logging
 import pymysql, time
+import func
 
 conf = ConfigParser()
 conf.read('db.cfg')
@@ -164,6 +166,10 @@ def FindPoemByKey(key):
             content_list.append(data)
     else:
         pass
+    # 将查询的诗人次数添加到数据库中
+    for each in author_list:
+        InsertSearchPoet(each)
+
     return json.dumps({
         "author_num": len(author_list),
         "title_num": len(title_list),
@@ -172,6 +178,7 @@ def FindPoemByKey(key):
         "title_list": title_list,
         "content_list": content_list
     }, ensure_ascii=False)
+
 
 
 def get_poet_info(word):
@@ -272,7 +279,12 @@ def favor_img(id):
 
 
 # 获取首页图片
-def GetHeadImg():
+def GetHeadImg(flag=1):
+    """
+    获取诗迹
+    :param flag: flag=1表示按照图片点赞数量排序 flag=2按时间排序
+    :return:
+    """
     sql = "SELECT * FROM Homepage_img"
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
@@ -286,8 +298,19 @@ def GetHeadImg():
               'id': each[3],
               'nikename': each[4],
               'openid': each[5],
-              'poem_title': each[6]}
+              'poem_title': each[6]
+              }
         data.append(dd)
+    # 根据flag返回需要排序的value
+    def return_item(item):
+        if int(flag) is 2:
+            return item['creat_time']
+        else:
+            return item['like_num']
+
+    data.sort(key=return_item,reverse=True)
+    for each in data:
+        print(each['creat_time'])
     return json.dumps(data, ensure_ascii=False)
 
 
@@ -343,11 +366,111 @@ def FindPoemByIdAndAreaCode(position, image_id_list):
     return json.dumps(data,ensure_ascii=False)
 
 
+def InsertSearchPoet(poet):
+
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+    cursor = db.cursor()
+    try:
+        result = json.loads(GetHotPoet_time(poet))
+        print(result)
+        time=int(result['time'])
+        sql='update hot_poet set time="{}" where poet="{}"'.format(time+1,poet)
+        cursor.execute(sql)
+        db.commit()
+    except:
+        time=1
+        sql='insert into hot_poet (poet,time) values ("{}","{}")'.format(poet,time)
+        cursor.execute(sql)
+        db.commit()
+
+def GetHotPoet_time(poet):
+    try:
+        sql='select * from hot_poet where poet="{}"'.format(poet)
+        db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+        cursor = db.cursor()
+        cursor.execute(sql)
+        result=cursor.fetchone()
+        data={'poet':result[0],'time':result[1]}
+        return json.dumps(data)
+
+    except:
+        return False
+
+
+def SaveUserSites(j, w, openid):
+    site=func.jwd_to_site(j,w)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+    cursor = db.cursor()
+    try:
+        time=1
+        try:
+            temp_date=json.loads(GetHotUserSite(openid))
+            for each in temp_date:
+                if each['site']==site:
+                    time=int(each['time'])
+        except:
+            pass
+        if time!=1:
+            sql='update user_site set time="{}" where site="{}"'.format(time+1,site)
+        else:
+            sql="INSERT INTO user_site (open_id,site,time) VALUES ('{}','{}','{}')".format(openid,site,time)
+        cursor.execute(sql)
+        db.commit()
+        return 'success'
+    except:
+        traceback.print_exc()
+        return 'error'
+
+
+
+def GetHotUserSite(openid):
+    try:
+        db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+        cursor = db.cursor()
+        sql = "SELECT * FROM user_site WHERE open_id='{}'".format(openid)
+        cursor.execute(sql)
+        result=cursor.fetchall()
+        date=[]
+        for each in result:
+            dd={'openid':each[0],'site':each[1],'time':each[2]}
+            date.append(dd)
+
+        def return_item(item):
+            return int(item['time'])
+        data=date.sort(key=return_item,reverse=True)
+        return json.dumps(date,ensure_ascii=False)
+    except:
+        return 'error'
+
+def GetHotPoet():
+    try:
+        sql='select * from hot_poet'
+        db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+        cursor = db.cursor()
+        cursor.execute(sql)
+        results=cursor.fetchall()
+        data=[]
+        for each in results:
+            dd={'poet':each[0],'time':each[1]}
+            data.append(dd)
+
+        def return_item(item):
+            return int(item['time'])
+        data.sort(key=return_item,reverse=True)
+        return json.dumps(data)
+    except:
+        traceback.print_exc()
+        return False
+
 if __name__ == '__main__':
     # print(get_poem(""))
     # print(get_poet_info("李白"))
     # print(FindPoemByKey(""))
     # SaveHeadingImg('http://www.baidu.com','shitou','123')
-    jisuan('20','30')
+    # jisuan('20','30')
+    # a=GetHeadImg(2)
+    # print(a)
+    a=GetHotUserSite('shitouopenid')
+    print(a)
 
 

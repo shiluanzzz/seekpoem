@@ -70,6 +70,7 @@ def GetHeadImg():
 @app.route('/favor',methods=['GET'])
 def favor():
     id=request.args.get('id')
+    openid=request.args.get('openid')
     return db_user.favor_img(id)
 
 @app.route('/SaveHeadingImg',methods=['GET'])

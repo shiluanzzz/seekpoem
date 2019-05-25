@@ -262,19 +262,53 @@ def SaveHeadingImg(url, nickname, openid,poem_title):
         return 'error'
 
 # 点赞
-def favor_img(id):
-    sql = "SELECT like_num FROM Homepage_img where id={}".format(id)
+def favor_img(id,openid):
+    flag=1 # flag标志是点赞还是取消点赞 1表示点赞 0表示取消点赞
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
-    cursor.execute(sql)
     try:
+        sql="select flag from user_favor where homeimg_id='{}' and open_id='{}'".format(id,openid)
+        cursor.execute(sql)
+        result=cursor.fetchone()
+        if result:
+            if int(result[0]) is 1:
+                # 取消点赞
+                flag=0
+                sql="update user_favor set flag='{}' where homeimg_id='{}' and open_id='{}'".format(flag,id,openid)
+            else:
+                flag=1
+                sql = "update user_favor set flag='{}' where homeimg_id='{}' and open_id='{}'".format(flag, id, openid)
+            cursor.execute(sql)
+
+        else:
+            # 没结果表示用户没对这个图片进行过操作
+            flag=1
+            sql="insert into user_favor(open_id,homeimg_id,flag)values('{}','{}','{}');".format(openid,id,flag)
+            cursor.execute(sql)
+            db.commit()
+    except:
+        print("查询用户点赞记录表出错")
+        traceback.print_exc()
+        pass
+
+
+    try:
+        sql = "SELECT like_num FROM Homepage_img where id={}".format(id)
+        cursor.execute(sql)
         like_num = cursor.fetchall()[0][0]
-        like_num += 1
+        if flag:
+            like_num += 1
+        else:
+            like_num-=1
         sql2 = 'UPDATE Homepage_img set like_num={} where id ={}'.format(like_num, id)
         cursor.execute(sql2)
         db.commit()
-        return 'success'
+        if flag:
+            return '点赞成功'
+        else:
+            return "取消点赞成功"
     except:
+        traceback.print_exc()
         return 'error'
 
 
@@ -470,7 +504,6 @@ if __name__ == '__main__':
     # jisuan('20','30')
     # a=GetHeadImg(2)
     # print(a)
-    a=GetHotUserSite('shitouopenid')
+    a=favor_img('24',"off5G48e9E7YYBLj2XQkZT5QXtQM")
     print(a)
-
 

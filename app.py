@@ -106,13 +106,16 @@ def SaveUserSites():
     openid=request.args.get('openid')
     return db_user.SaveUserSites(j,w,openid)
 
-#获取拥护去过的地方
+#获取用户去过的地方
 @app.route('/GetUserSites',methods=['GET'])
 def GetUserSites():
     openid=request.args.get('openid')
     return db_user.GetHotUserSite(openid)
 
-
+@app.route('/GetUserFavor',methods=['GET'])
+def GetUserFavor():
+    openid=request.args.get('openid')
+    return db_user.GetUserFavor(openid)
 if __name__ == '__main__':
 
     app.run(host="0.0.0.0",port="8000",debug=True)

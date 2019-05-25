@@ -491,7 +491,21 @@ def GetHotPoet():
         def return_item(item):
             return int(item['time'])
         data.sort(key=return_item,reverse=True)
-        return json.dumps(data)
+        return json.dumps(data,ensure_ascii=False)
+    except:
+        traceback.print_exc()
+        return False
+
+
+def GetUserFavor(openid):
+    try:
+        sql = 'select homeimg_id from user_favor where open_id="{}" and flag="1"'.format(openid)
+        db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+        cursor = db.cursor()
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        data = [each[0] for each in results]
+        return json.dumps(data, ensure_ascii=False)
     except:
         traceback.print_exc()
         return False
@@ -504,6 +518,7 @@ if __name__ == '__main__':
     # jisuan('20','30')
     # a=GetHeadImg(2)
     # print(a)
-    a=favor_img('24',"off5G48e9E7YYBLj2XQkZT5QXtQM")
-    print(a)
+    # a=favor_img('24',"off5G48e9E7YYBLj2XQkZT5QXtQM")
+    # print(a)
+    print(GetUserFavor('off5G48e9E7YYBLj2XQkZT5QXtQM'))
 

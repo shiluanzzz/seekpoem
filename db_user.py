@@ -245,10 +245,10 @@ def get_poem_by_position(j, w):
     return json.dumps(data_list, ensure_ascii=False)
 
 
-def SaveHeadingImg(url, nickname, openid,poem_title):
+def SaveHeadingImg(url, nickname, openid,poem_title,user_img):
     try:
         now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        sql = 'INSERT into Homepage_img (url,like_num,creat_time,nickname,openid,poem_title) value ("{}","{}","{}","{}","{}","{}")'.format(url, '0', now_time, nickname, openid,poem_title)
+        sql = 'INSERT into Homepage_img (url,like_num,creat_time,nickname,openid,poem_title,headImage) value ("{}","{}","{}","{}","{}","{}","{}")'.format(url, '0', now_time, nickname, openid,poem_title,user_img)
         db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
         cursor = db.cursor()
         cursor.execute(sql)
@@ -335,7 +335,10 @@ def GetHeadImg(openid,flag=1):
               'nikename': each[4],
               'penid': each[5],
               'poem_title': each[6],
-              'favor': a
+              'favor': a,
+              'url_backpack':each[7],
+              'headImage':each[8],
+              'headImage_backpack':each[9]
               }
         data.append(dd)
     # 根据flag返回需要排序的value
@@ -346,12 +349,6 @@ def GetHeadImg(openid,flag=1):
             return item['like_num']
 
     data.sort(key=return_item,reverse=True)
-
-    # 讲图片和用户是否点赞绑定
-
-
-
-
     return json.dumps(data, ensure_ascii=False)
 
 

@@ -65,7 +65,8 @@ def GetPoemByPosition():
 @app.route('/GetHeadImg',methods=['GET'])
 def GetHeadImg():
     flag=request.args.get('flag')
-    return db_user.GetHeadImg(int(flag))
+    openid=request.args.get('openid')
+    return db_user.GetHeadImg(openid,int(flag))
 
 @app.route('/favor',methods=['GET'])
 def favor():

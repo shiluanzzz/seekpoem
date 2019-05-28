@@ -11,7 +11,7 @@ import db_user
 
 logger = logging.getLogger(__name__)  # 设置日志名称
 logger.setLevel(logging.INFO)  # 设置日志打印等级
-handler = logging.FileHandler("func.log")  # 创建日志文件
+handler = logging.FileHandler("log_func.log")  # 创建日志文件
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # 设置日志的打印格式
 handler.setFormatter(formatter)  #
 logger.addHandler(handler)

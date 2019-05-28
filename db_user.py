@@ -19,7 +19,7 @@ passwd = conf.get(section, 'passwd')
 
 logger = logging.getLogger(__name__)  # 设置日志名称
 logger.setLevel(logging.INFO)  # 设置日志打印等级
-handler = logging.FileHandler("db_user.log")  # 创建日志文件
+handler = logging.FileHandler("log_db_user.log")  # 创建日志文件
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # 设置日志的打印格式
 handler.setFormatter(formatter)  #
 logger.addHandler(handler)
@@ -167,8 +167,8 @@ def FindPoemByKey(key):
     else:
         pass
     # 将查询的诗人次数添加到数据库中
-    for each in author_list:
-        InsertSearchPoet(each)
+    if results1:
+        InsertSearchPoet(key)
 
     return json.dumps({
         "author_num": len(author_list),
@@ -313,12 +313,13 @@ def favor_img(id,openid):
 
 
 # 获取首页图片
-def GetHeadImg(flag=1):
+def GetHeadImg(openid,flag=1):
     """
     获取诗迹
     :param flag: flag=1表示按照图片点赞数量排序 flag=2按时间排序
     :return:
     """
+    favor_list=json.loads(GetUserFavor(openid))
     sql = "SELECT * FROM Homepage_img"
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
@@ -326,13 +327,15 @@ def GetHeadImg(flag=1):
     result = cursor.fetchall()
     data = []
     for each in result:
+        a = str(each[3]) in favor_list
         dd = {'url': each[0],
               'like_num': each[1],
               'creat_time': str(each[2]),
               'id': each[3],
               'nikename': each[4],
-              'openid': each[5],
-              'poem_title': each[6]
+              'penid': each[5],
+              'poem_title': each[6],
+              'favor': a
               }
         data.append(dd)
     # 根据flag返回需要排序的value
@@ -343,8 +346,12 @@ def GetHeadImg(flag=1):
             return item['like_num']
 
     data.sort(key=return_item,reverse=True)
-    for each in data:
-        print(each['creat_time'])
+
+    # 讲图片和用户是否点赞绑定
+
+
+
+
     return json.dumps(data, ensure_ascii=False)
 
 
@@ -520,5 +527,5 @@ if __name__ == '__main__':
     # print(a)
     # a=favor_img('24',"off5G48e9E7YYBLj2XQkZT5QXtQM")
     # print(a)
-    print(GetUserFavor('off5G48e9E7YYBLj2XQkZT5QXtQM'))
-
+    # print(GetUserFavor('off5G48e9E7YYBLj2XQkZT5QXtQM'))
+    a=GetHeadImg('off5G48e9E7YYBLj2XQkZT5QXtQM',1)

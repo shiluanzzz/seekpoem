@@ -254,6 +254,7 @@ def SaveHeadingImg(url, nickname, openid,poem_title,user_img):
         cursor.execute(sql)
         db.commit()
         db.close()
+        print(sql)
         return 'success'
     except:
         traceback.print_exc()
@@ -515,14 +516,5 @@ def GetUserFavor(openid):
         return False
 
 if __name__ == '__main__':
-    # print(get_poem(""))
-    # print(get_poet_info("李白"))
-    # print(FindPoemByKey(""))
-    # SaveHeadingImg('http://www.baidu.com','shitou','123')
-    # jisuan('20','30')
-    # a=GetHeadImg(2)
-    # print(a)
-    # a=favor_img('24',"off5G48e9E7YYBLj2XQkZT5QXtQM")
-    # print(a)
-    # print(GetUserFavor('off5G48e9E7YYBLj2XQkZT5QXtQM'))
+
     a=GetHeadImg('off5G48e9E7YYBLj2XQkZT5QXtQM',1)

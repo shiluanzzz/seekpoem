@@ -86,7 +86,7 @@ def SaveHeadingImg():
     nickname=request.args.get('nickname')
     openid=request.args.get('openid')
     poem_title=request.args.get('poem_title')
-    user_img=request.args.get('userimg_usl')
+    user_img=request.args.get('userimg_url')
     return db_user.SaveHeadingImg(url=url,nickname=nickname,openid=openid,poem_title=poem_title,
                                   user_img=user_img)
 

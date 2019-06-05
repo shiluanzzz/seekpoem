@@ -19,7 +19,7 @@ passwd = conf.get(section, 'passwd')
 
 logger = logging.getLogger(__name__)  # 设置日志名称
 logger.setLevel(logging.INFO)  # 设置日志打印等级
-handler = logging.FileHandler("db_user.log")  # 创建日志文件
+handler = logging.FileHandler("log_db_user.log")  # 创建日志文件
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # 设置日志的打印格式
 handler.setFormatter(formatter)  #
 logger.addHandler(handler)
@@ -167,8 +167,8 @@ def FindPoemByKey(key):
     else:
         pass
     # 将查询的诗人次数添加到数据库中
-    for each in author_list:
-        InsertSearchPoet(each)
+    if results1:
+        InsertSearchPoet(key)
 
     return json.dumps({
         "author_num": len(author_list),
@@ -178,8 +178,6 @@ def FindPoemByKey(key):
         "title_list": title_list,
         "content_list": content_list
     }, ensure_ascii=False)
-
-
 
 def get_poet_info(word):
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
@@ -198,7 +196,6 @@ def get_poet_info(word):
         return None
     db.close()
     return results
-
 
 def jisuan(w, j):
     '''
@@ -222,7 +219,6 @@ def jisuan(w, j):
     return result
     # <class 'tuple'>: ('CN6529', '阿克苏地区', 80.2606, 41.1688, 5272281.0)
 
-
 def get_poem_by_position(j, w):
     jisuan_result = jisuan(w, j)
     area_code = jisuan_result[0]
@@ -243,17 +239,17 @@ def get_poem_by_position(j, w):
         }
         data_list.append(dd)
     return json.dumps(data_list, ensure_ascii=False)
-
-
-def SaveHeadingImg(url, nickname, openid,poem_title):
+# 1
+def SaveHeadingImg(url, nickname, openid,poem_title,user_img):
     try:
         now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        sql = 'INSERT into Homepage_img (url,like_num,creat_time,nickname,openid,poem_title) value ("{}","{}","{}","{}","{}","{}")'.format(url, '0', now_time, nickname, openid,poem_title)
+        sql = 'INSERT into Homepage_img (url,like_num,creat_time,nickname,openid,poem_title,headImage) value ("{}","{}","{}","{}","{}","{}","{}")'.format(url, '0', now_time, nickname, openid,poem_title,user_img)
         db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
         cursor = db.cursor()
         cursor.execute(sql)
         db.commit()
         db.close()
+        print(sql)
         return 'success'
     except:
         traceback.print_exc()
@@ -311,14 +307,14 @@ def favor_img(id,openid):
         traceback.print_exc()
         return 'error'
 
-
 # 获取首页图片
-def GetHeadImg(flag=1):
+def GetHeadImg(openid,flag=1):
     """
     获取诗迹
     :param flag: flag=1表示按照图片点赞数量排序 flag=2按时间排序
     :return:
     """
+    favor_list=json.loads(GetUserFavor(openid))
     sql = "SELECT * FROM Homepage_img"
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
@@ -326,13 +322,18 @@ def GetHeadImg(flag=1):
     result = cursor.fetchall()
     data = []
     for each in result:
+        a = str(each[3]) in favor_list
         dd = {'url': each[0],
               'like_num': each[1],
               'creat_time': str(each[2]),
               'id': each[3],
               'nikename': each[4],
               'openid': each[5],
-              'poem_title': each[6]
+              'poem_title': each[6],
+              'favor': a,
+              'url_backpack':each[7],
+              'headImage':each[8],
+              'headImage_backpack':each[9]
               }
         data.append(dd)
     # 根据flag返回需要排序的value
@@ -343,10 +344,7 @@ def GetHeadImg(flag=1):
             return item['like_num']
 
     data.sort(key=return_item,reverse=True)
-    for each in data:
-        print(each['creat_time'])
     return json.dumps(data, ensure_ascii=False)
-
 
 def GetImgByOpenId(openid):
     """
@@ -425,11 +423,10 @@ def GetHotPoet_time(poet):
         cursor.execute(sql)
         result=cursor.fetchone()
         data={'poet':result[0],'time':result[1]}
-        return json.dumps(data)
+        return json.dumps(data,ensure_ascii=False)
 
     except:
         return False
-
 
 def SaveUserSites(j, w, openid):
     site=func.jwd_to_site(j,w)
@@ -454,8 +451,6 @@ def SaveUserSites(j, w, openid):
     except:
         traceback.print_exc()
         return 'error'
-
-
 
 def GetHotUserSite(openid):
     try:
@@ -496,7 +491,6 @@ def GetHotPoet():
         traceback.print_exc()
         return False
 
-
 def GetUserFavor(openid):
     try:
         sql = 'select homeimg_id from user_favor where open_id="{}" and flag="1"'.format(openid)
@@ -511,14 +505,18 @@ def GetUserFavor(openid):
         return False
 
 if __name__ == '__main__':
-    # print(get_poem(""))
-    # print(get_poet_info("李白"))
-    # print(FindPoemByKey(""))
-    # SaveHeadingImg('http://www.baidu.com','shitou','123')
-    # jisuan('20','30')
-    # a=GetHeadImg(2)
-    # print(a)
-    # a=favor_img('24',"off5G48e9E7YYBLj2XQkZT5QXtQM")
-    # print(a)
-    print(GetUserFavor('off5G48e9E7YYBLj2XQkZT5QXtQM'))
 
+    # a=GetHeadImg('off5G48e9E7YYBLj2XQkZT5QXtQM',1)
+    # a=SaveHeadingImg("www.baidu.com","shitou","shitouopenid","测试标题","www.aa.com")
+    # a=favor_img('1','shitouopenid')
+    # a=GetHeadImg("shitouopenid",1)
+
+    # a=GetImgByOpenId("shitouopenid")
+    # a=InsertSearchPoet("李白")
+    # a=GetHotPoet_time("李白")
+    # a=SaveUserSites('113.61','23.58','shitouopenid')
+    a=GetHotUserSite("shitouopenid")
+
+
+
+    print(a)

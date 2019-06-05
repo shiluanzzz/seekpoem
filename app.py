@@ -39,48 +39,58 @@ def params():
     logging.info("params {}".format(word))
     return func.chuli(word)
 
-
+# 获取诗库
 @app.route('/GetPoems',methods=['GET'])
 def GetPoems():
     logging.info("GetPoems")
     return func.GetPoems()
 
+# 根据关键词寻诗
 @app.route('/FindPoem',methods=['GET'])
 def FindPoem():
     word=request.args.get('key')
     logging.info("FindPoem {}".format(word))
     return FindPoemByKey(key=word)
 
+# 获取诗人信息
 @app.route("/GetPoetInfo",methods=['GET'])
 def GetPoetInfo():
     word = request.args.get('name')
     return func.GetPoetInfo(word)
 
+# 地理位置寻诗
 @app.route("/GetPoemByPosition",methods=['GET'])
 def GetPoemByPosition():
     w=request.args.get('w')
     j=request.args.get('j')
     return db_user.get_poem_by_position(j=j,w=w)
 
+# 获取主页图片
 @app.route('/GetHeadImg',methods=['GET'])
 def GetHeadImg():
     flag=request.args.get('flag')
-    return db_user.GetHeadImg(int(flag))
+    openid=request.args.get('openid')
+    return db_user.GetHeadImg(openid,int(flag))
 
+# 点赞
 @app.route('/favor',methods=['GET'])
 def favor():
     id=request.args.get('id')
     openid=request.args.get('openid')
     return db_user.favor_img(id,openid)
 
+# 保存主页图片
 @app.route('/SaveHeadingImg',methods=['GET'])
 def SaveHeadingImg():
-    url=request.args.get('url')
+    url=request.args.get('img_url')
     nickname=request.args.get('nickname')
     openid=request.args.get('openid')
     poem_title=request.args.get('poem_title')
-    return db_user.SaveHeadingImg(url=url,nickname=nickname,openid=openid,poem_title=poem_title)
+    user_img=request.args.get('userimg_url')
+    return db_user.SaveHeadingImg(url=url,nickname=nickname,openid=openid,poem_title=poem_title,
+                                  user_img=user_img)
 
+# 根据地理位置、意向 寻找诗
 @app.route("/FindPoemByImageAndPosition",methods=['GET'])
 def FindPoemByImageAndPosition():
     image=request.args.get('i')
@@ -88,6 +98,7 @@ def FindPoemByImageAndPosition():
     w=request.args.get('w')
     return func.FindPoemByImageAndPosition(image=image,j=j,w=w)
 
+# 获取用户的诗迹
 @app.route("/FindMyPoem",methods=['GET'])
 def FindMyPoem():
     id=request.args.get('id')
@@ -112,6 +123,7 @@ def GetUserSites():
     openid=request.args.get('openid')
     return db_user.GetHotUserSite(openid)
 
+#获取用户点赞过的图片
 @app.route('/GetUserFavor',methods=['GET'])
 def GetUserFavor():
     openid=request.args.get('openid')

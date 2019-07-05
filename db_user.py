@@ -7,7 +7,8 @@ import traceback
 from configparser import ConfigParser
 import logging
 import pymysql, time
-import func
+# from func import jwd_to_site
+import requests
 
 conf = ConfigParser()
 conf.read('db.cfg')
@@ -23,6 +24,26 @@ handler = logging.FileHandler("log_db_user.log")  # 创建日志文件
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # 设置日志的打印格式
 handler.setFormatter(formatter)  #
 logger.addHandler(handler)
+
+def jwd_to_site(j,w):
+    """
+    经纬度转地名
+    :param j:  经度
+    :param w: 纬度
+    :return:  返回地名
+    """
+    parameters = {'location': "{},{}".format(str(j),str(w)), 'key': 'cfedb9207134ba8128b62a0c171c3de2'}
+    base = 'https://restapi.amap.com/v3/geocode/regeo?'
+    response = requests.get(base, parameters)
+    print(response.url)
+    answer = response.json()
+    try:
+        city=answer['regeocode']['addressComponent']['city']
+        return str(city).strip('市')
+    except:
+        province=answer['regeocode']['addressComponent']['province']
+        return str(province).strip('省')
+
 
 
 def get_poems(image):
@@ -429,7 +450,7 @@ def GetHotPoet_time(poet):
         return False
 
 def SaveUserSites(j, w, openid):
-    site=func.jwd_to_site(j,w)
+    site=jwd_to_site(j,w)
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
     try:
@@ -515,8 +536,8 @@ if __name__ == '__main__':
     # a=InsertSearchPoet("李白")
     # a=GetHotPoet_time("李白")
     # a=SaveUserSites('113.61','23.58','shitouopenid')
-    a=GetHotUserSite("shitouopenid")
+    # a=GetHotUserSite("shitouopenid")
 
-
+    a=1
 
     print(a)

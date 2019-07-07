@@ -1,13 +1,13 @@
 # -*- coding:utf-8 -*-
 # __author__ = "shitou6"
 import json
-import random
-import traceback
-import db_connect
-import synonyms
-import time
-
 import logging
+import random
+
+import synonyms
+
+import db_connect
+
 logger=logging.getLogger(__name__) # 设置日志名称
 logger.setLevel(logging.INFO) #设置日志打印等级
 handler=logging.FileHandler("syonoym.log") # 创建日志文件

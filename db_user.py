@@ -10,6 +10,7 @@ import pymysql, time
 # from func import jwd_to_site
 import requests
 
+
 conf = ConfigParser()
 conf.read('db.cfg')
 section = conf.sections()[0]

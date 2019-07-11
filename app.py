@@ -140,6 +140,11 @@ def GetUserFavor():
     openid = request.args.get('openid')
     return db_user.GetUserFavor(openid)
 
+# 搜索自动补全
+@app.route('/SearchComplete',methods=['GET'])
+def SearchComplete():
+    key=request.args.get('k')
+    return db_user.SearchComplete(key)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port="8000", debug=False ,use_reloader=False)

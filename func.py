@@ -44,7 +44,6 @@ def find_jyc(word,num=0.9):
     except:
         pass
 
-
 def GetPoetInfo(word):
     result=db_user.get_poet_info(word)
     if result:
@@ -55,7 +54,7 @@ def GetPoetInfo(word):
         }
         return json.dumps(data,ensure_ascii=False)
     else:
-        return 0
+        return json.dumps({},ensure_ascii=False)
 
 def get_poems_by_image(word):
     """
@@ -180,6 +179,8 @@ def jwd_to_site(j,w):
     except:
         province=answer['regeocode']['addressComponent']['province']
         return str(province).strip('省')
+
+
 
 
 if __name__ == '__main__':

@@ -56,7 +56,7 @@ def get_poems(image):
     # print(image)
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
-    sql = 'SELECT * FROM Image WHERE image="{}"'.format(image)
+    sql = 'SELECT * FROM Image WHERE image="{}" limit 5'.format(image)
     try:
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -419,7 +419,6 @@ def FindPoemByIdAndAreaCode(position, image_id_list):
         data.append(dd)
     return json.dumps(data,ensure_ascii=False)
 
-
 def InsertSearchPoet(poet):
 
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
@@ -526,6 +525,22 @@ def GetUserFavor(openid):
         traceback.print_exc()
         return False
 
+def SearchComplete(key):
+    sql1 = "SELECT author FROM Poet WHERE author like '%{}%' limit 3".format(key)
+    sql2 = "SELECT title FROM Image WHERE title like '%{}%' limit 2 " .format(key)
+    db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+    cursor = db.cursor()
+    cursor.execute(sql1)
+    result1=cursor.fetchall()
+    cursor.execute(sql2)
+    result2=cursor.fetchall()
+    data1=[each[0] for each in result1]
+    data2=[each[0] for each in result2]
+    data=data1+data2
+    return json.dumps(data,ensure_ascii=False)
+
+
+
 if __name__ == '__main__':
 
     # a=GetHeadImg('off5G48e9E7YYBLj2XQkZT5QXtQM',1)
@@ -539,6 +554,7 @@ if __name__ == '__main__':
     # a=SaveUserSites('113.61','23.58','shitouopenid')
     # a=GetHotUserSite("shitouopenid")
 
-    a=1
+    SearchComplete("石")
 
-    print(a)
+    # print(a)
+

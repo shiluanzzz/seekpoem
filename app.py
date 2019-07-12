@@ -4,9 +4,7 @@ import json
 import logging
 
 from flask import Flask, request
-
-import db_user
-import func
+from utils import db_user, func
 
 logger = logging.getLogger(__name__)  # 设置日志名称
 logger.setLevel(logging.INFO)  # 设置日志打印等级

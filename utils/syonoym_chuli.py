@@ -6,7 +6,7 @@ import random
 
 import synonyms
 
-import db_connect
+from utils import db_connect
 
 logger=logging.getLogger(__name__) # 设置日志名称
 logger.setLevel(logging.INFO) #设置日志打印等级

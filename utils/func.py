@@ -6,10 +6,9 @@ import random
 import traceback
 
 import requests
-from synonyms import compare
+# from synonyms import compare
 
-import db_connect
-import db_user
+from utils import db_user, db_connect
 
 logger = logging.getLogger(__name__)  # 设置日志名称
 logger.setLevel(logging.INFO)  # 设置日志打印等级
@@ -45,7 +44,7 @@ def find_jyc(word,num=0.9):
         pass
 
 def GetPoetInfo(word):
-    result=db_user.get_poet_info(word)
+    result= db_user.get_poet_info(word)
     if result:
         data={
             'author':result[0],
@@ -139,8 +138,12 @@ def GetPoems():
         db_results = db_user.GetPoems_Random()
         if db_results:
             data_list = []
+            count=0
+            single_list=[]
             for db_result in db_results:
-                data = {'db_id': db_result[0],
+                count+=1
+                data = {
+                        'db_id': db_result[0],
                         'title': db_result[1],
                         'author': db_result[2],
                         'dynasty': db_result[3],
@@ -148,18 +151,22 @@ def GetPoems():
                         'poem_image': db_result[5],
                         'typeid': db_result[6]
                         }
-                data_list.append(data)
+                single_list.append(data)
+                if count==20:
+                    data_list.append(single_list)
+                    single_list=[]
+                    count=0
             return json.dumps(data_list, ensure_ascii=False)
     except:
         logger.error(traceback.format_exc())
 
 
 def FindPoemByImageAndPosition(image,j,w):
-    position=db_user.jisuan(j=j,w=w)[0] #ip_areacode
+    position= db_user.jisuan(j=j, w=w)[0] #ip_areacode
     print(position)
     image_data=json.loads(get_poems_by_image(image))
     image_id_list=[each['db_id'] for each in image_data]
-    return db_user.FindPoemByIdAndAreaCode(position,image_id_list)
+    return db_user.FindPoemByIdAndAreaCode(position, image_id_list)
 
 def jwd_to_site(j,w):
     """
@@ -184,5 +191,5 @@ def jwd_to_site(j,w):
 
 
 if __name__ == '__main__':
-    a=jwd_to_site(114.308,34.7972)
+    a=GetPoems()
     print(a)

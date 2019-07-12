@@ -2,12 +2,12 @@
 # __author__ = "shitou6"
 import json
 import operator
+import os
 import random
 import traceback
 from configparser import ConfigParser
 import logging
 import pymysql, time
-# from func import jwd_to_site
 import requests
 
 
@@ -92,7 +92,7 @@ def get_poem(image):
 def GetPoems_Random():
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
-    sql = "SELECT * FROM Image WHERE id mod {}=0".format(random.randint(50, 60))
+    sql = "SELECT * FROM Image WHERE id mod {}=0 limit 200".format(random.randint(50, 60))
     try:
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -454,7 +454,7 @@ def SaveUserSites(j, w, openid):
     db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
     cursor = db.cursor()
     try:
-        time=1
+        time=0
         try:
             temp_date=json.loads(GetHotUserSite(openid))
             for each in temp_date:
@@ -462,10 +462,10 @@ def SaveUserSites(j, w, openid):
                     time=int(each['time'])
         except:
             pass
-        if time!=1:
+        if time!=0:
             sql='update user_site set time="{}" where site="{}"'.format(time+1,site)
         else:
-            sql="INSERT INTO user_site (open_id,site,time) VALUES ('{}','{}','{}')".format(openid,site,time)
+            sql="INSERT INTO user_site (open_id,site,time) VALUES ('{}','{}','{}')".format(openid,site,time+1)
         cursor.execute(sql)
         db.commit()
         return 'success site:{}'.format(site)
@@ -543,18 +543,5 @@ def SearchComplete(key):
 
 if __name__ == '__main__':
 
-    # a=GetHeadImg('off5G48e9E7YYBLj2XQkZT5QXtQM',1)
-    # a=SaveHeadingImg("www.baidu.com","shitou","shitouopenid","测试标题","www.aa.com")
-    # a=favor_img('1','shitouopenid')
-    # a=GetHeadImg("shitouopenid",1)
 
-    # a=GetImgByOpenId("shitouopenid")
-    # a=InsertSearchPoet("李白")
-    # a=GetHotPoet_time("李白")
-    # a=SaveUserSites('113.61','23.58','shitouopenid')
-    # a=GetHotUserSite("shitouopenid")
-
-    SearchComplete("石")
-
-    # print(a)
-
+    SaveUserSites('113.52','38.11','shiluanopenid')

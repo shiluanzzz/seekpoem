@@ -9,7 +9,7 @@ from configparser import ConfigParser
 import logging
 import pymysql, time
 import requests
-
+from utils.oss_upload.main import replace_url
 
 conf = ConfigParser()
 conf.read('db.cfg')
@@ -263,7 +263,9 @@ def get_poem_by_position(j, w):
     return json.dumps(data_list, ensure_ascii=False)
 # 1
 def SaveHeadingImg(url, nickname, openid,poem_title,user_img):
+    replace_url(url)
     try:
+        print("111")
         now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         sql = 'INSERT into Homepage_img (url,like_num,creat_time,nickname,openid,poem_title,headImage) value ("{}","{}","{}","{}","{}","{}","{}")'.format(url, '0', now_time, nickname, openid,poem_title,user_img)
         db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
@@ -541,7 +543,9 @@ def SearchComplete(key):
 
 
 
+
+
+
 if __name__ == '__main__':
 
-
-    SaveUserSites('113.52','38.11','shiluanopenid')
+    SaveHeadingImg('https://i.loli.net/2019/05/26/5cea4f894b1b981237.png','shitou','shitouopenid','test','http://baidu.com')

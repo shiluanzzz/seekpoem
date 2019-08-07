@@ -6,7 +6,7 @@ import random
 import traceback
 
 import requests
-# from synonyms import compare
+from synonyms import compare
 
 from utils import db_user, db_connect
 
@@ -18,42 +18,43 @@ handler.setFormatter(formatter)  #
 logger.addHandler(handler)
 
 
-
-def find_jyc(word,num=0.9):
+def find_jyc(word, num=0.9):
     try:
         try:
             with open('image.json', 'r')as f:
                 data = json.load(f)
-            num=float(num)# 相似度值
+            num = float(num)  # 相似度值
         except:
             print("image.json 文件不存在 正在重新下载")
             db_connect.get_image_json()
-            return find_jyc(word,num)
-        if num<0.4:
-            return {'poem_image':'花','num':'0.001'}
+            return find_jyc(word, num)
+        if num < 0.4:
+            return {'poem_image': '花', 'num': '0.001'}
         else:
-            copy=list(data)
+            copy = list(data)
             while len(copy):
-                data_word=copy[random.randint(0,len(copy)-1)]
+                data_word = copy[random.randint(0, len(copy) - 1)]
                 copy.remove(data_word)
-                r=compare(word,data_word,seg=False)
-                if r>num:
-                    return {'poem_image':data_word,'num':r}
-            return find_jyc(word,num=num-0.1)
+                r = compare(word, data_word, seg=False)
+                if r > num:
+                    return {'poem_image': data_word, 'num': r}
+            return find_jyc(word, num=num - 0.1)
     except:
         pass
 
+
 def GetPoetInfo(word):
-    result= db_user.get_poet_info(word)
+    result = db_user.get_poet_info(word)
     if result:
-        data={
-            'author':result[0],
-            'dynasty':result[1],
-            'introduction':result[2]
+        data = {
+            'author': result[0],
+            'dynasty': result[1],
+            'introduction': result[2]
         }
-        return json.dumps(data,ensure_ascii=False)
+        return json.dumps(data, ensure_ascii=False)
     else:
-        return json.dumps({},ensure_ascii=False)
+        return json.dumps({}, ensure_ascii=False)
+
 
 def get_poems_by_image(word):
     """
@@ -77,10 +78,11 @@ def get_poems_by_image(word):
                 data_list.append(data)
             return json.dumps(data_list, ensure_ascii=False)
         else:
-            word2=find_jyc(word,0.8)["poem_image"]
+            word2 = find_jyc(word, 0.8)["poem_image"]
             return get_poems_by_image(word2)
     except:
         logger.error(traceback.format_exc())
+
 
 def chuli(word):
     """
@@ -129,6 +131,7 @@ def chuli(word):
         logger.error(traceback.format_exc())
         return None
 
+
 def GetPoems():
     """
     查询所有诗
@@ -138,58 +141,66 @@ def GetPoems():
         db_results = db_user.GetPoems_Random()
         if db_results:
             data_list = []
-            count=0
-            single_list=[]
+            count = 0
+            single_list = []
             for db_result in db_results:
-                count+=1
+                count += 1
                 data = {
-                        'db_id': db_result[0],
-                        'title': db_result[1],
-                        'author': db_result[2],
-                        'dynasty': db_result[3],
-                        'content': db_result[4],
-                        'poem_image': db_result[5],
-                        'typeid': db_result[6]
-                        }
+                    'db_id': db_result[0],
+                    'title': db_result[1],
+                    'author': db_result[2],
+                    'dynasty': db_result[3],
+                    'content': db_result[4],
+                    'poem_image': db_result[5],
+                    'typeid': db_result[6]
+                }
                 single_list.append(data)
-                if count==20:
+                if count == 20:
                     data_list.append(single_list)
-                    single_list=[]
-                    count=0
+                    single_list = []
+                    count = 0
             return json.dumps(data_list, ensure_ascii=False)
     except:
         logger.error(traceback.format_exc())
 
 
-def FindPoemByImageAndPosition(image,j,w):
-    position= db_user.jisuan(j=j, w=w)[0] #ip_areacode
+def FindPoemByImageAndPosition(image, j, w):
+    position = db_user.jisuan(j=j, w=w)[0]  # ip_areacode
     print(position)
-    image_data=json.loads(get_poems_by_image(image))
-    image_id_list=[each['db_id'] for each in image_data]
+    image_data = json.loads(get_poems_by_image(image))
+    image_id_list = [each['db_id'] for each in image_data]
     return db_user.FindPoemByIdAndAreaCode(position, image_id_list)
 
-def jwd_to_site(j,w):
+
+def jwd_to_site(j, w):
     """
     经纬度转地名
     :param j:  经度
     :param w: 纬度
     :return:  返回地名
     """
-    parameters = {'location': "{},{}".format(str(j),str(w)), 'key': 'cfedb9207134ba8128b62a0c171c3de2'}
+    parameters = {'location': "{},{}".format(str(j), str(w)), 'key': 'cfedb9207134ba8128b62a0c171c3de2'}
     base = 'https://restapi.amap.com/v3/geocode/regeo?'
     response = requests.get(base, parameters)
     print(response.url)
     answer = response.json()
     try:
-        city=answer['regeocode']['addressComponent']['city']
+        city = answer['regeocode']['addressComponent']['city']
         return str(city).strip('市')
     except:
-        province=answer['regeocode']['addressComponent']['province']
+        province = answer['regeocode']['addressComponent']['province']
         return str(province).strip('省')
 
 
-
+def get_openid(code):
+    APPID = "wx97d71dcabf80313f"
+    AppSecre = "3b1a53dae83a531c98ab328be0e6f348"
+    url='https://api.weixin.qq.com/sns/jscode2session?appid=' + APPID + '&secret=' + AppSecre + '&js_code=' + code + '&grant_type=authorization_code'
+    r=requests.get(url)
+    data=eval(r.text)
+    return json.dumps(data)
 
 if __name__ == '__main__':
-    a=GetPoems()
-    print(a)
+    # a = GetPoems()
+    # print(a)
+    get_openid('001nlNp21NomKR1mNcq210aEp21nlNpn')

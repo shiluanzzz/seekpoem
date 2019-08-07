@@ -541,6 +541,17 @@ def SearchComplete(key):
     data=data1+data2
     return json.dumps(data,ensure_ascii=False)
 
+def del_user_img(key):
+    try:
+        sql1 = "DELETE FROM Homepage_img WHERE id={}".format(key)
+        db = pymysql.connect(host=host, user=user, passwd=passwd, db=db_name)
+        cursor = db.cursor()
+        cursor.execute(sql1)
+        db.commit()
+        return True
+    except:
+        traceback.print_exc()
+        return False
 
 
 
@@ -548,4 +559,8 @@ def SearchComplete(key):
 
 if __name__ == '__main__':
 
-    SaveHeadingImg('https://i.loli.net/2019/05/26/5cea4f894b1b981237.png','shitou','shitouopenid','test','http://baidu.com')
+    # SaveHeadingImg('https://i.loli.net/2019/05/26/5cea4f894b1b981237.png','shitou','shitouopenid','test','http://baidu.com')
+    # print(jwd_to_site('150','34.7972'))
+    a=del_user_img('41')
+    print(a)
+

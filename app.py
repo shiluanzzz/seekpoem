@@ -2,6 +2,7 @@
 # __author__ = "shitou6"
 import json
 import logging
+import traceback
 
 from flask import Flask, request
 from utils import db_user, func
@@ -143,6 +144,25 @@ def GetUserFavor():
 def SearchComplete():
     key=request.args.get('k')
     return db_user.SearchComplete(key)
+
+@app.route('/get_openid',methods=['GET'])
+def get_openid():
+    code=request.args.get('code')
+    data=func.get_openid(code)
+    try:
+        return data['openid'],200
+    except:
+        return traceback.format_exc(),500
+
+@app.route('/delete_user_img',methods=['GET'])
+def del_user_img():
+    key=request.args.get('id')
+    try:
+        db_user.del_user_img(key)
+    except:
+        return 500
+    return 200
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port="8000", debug=False ,use_reloader=False)

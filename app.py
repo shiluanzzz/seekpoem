@@ -159,9 +159,10 @@ def del_user_img():
     key=request.args.get('id')
     try:
         db_user.del_user_img(key)
+        return "success",200
     except:
-        return 500
-    return 200
+        return traceback.format_exc(),500
+
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ import random
 import traceback
 
 import requests
-from synonyms import compare
+# from synonyms import compare
 
 from utils import db_user, db_connect
 
@@ -198,7 +198,8 @@ def get_openid(code):
     url='https://api.weixin.qq.com/sns/jscode2session?appid=' + APPID + '&secret=' + AppSecre + '&js_code=' + code + '&grant_type=authorization_code'
     r=requests.get(url)
     data=eval(r.text)
-    return json.dumps(data)
+    print(data['errmsg'])
+    return data
 
 if __name__ == '__main__':
     # a = GetPoems()

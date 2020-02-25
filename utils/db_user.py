@@ -559,8 +559,6 @@ def del_user_img(key):
 
 if __name__ == '__main__':
 
-    # SaveHeadingImg('https://i.loli.net/2019/05/26/5cea4f894b1b981237.png','shitou','shitouopenid','test','http://baidu.com')
-    # print(jwd_to_site('150','34.7972'))
-    a=del_user_img('41')
+    a=GetHotPoet()
     print(a)
 
